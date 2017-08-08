@@ -1,3 +1,4 @@
+from __future__ import print_function
 import os
 import math
 import numpy as np
@@ -50,12 +51,12 @@ class GomoryCutGenerator:
         rhsIsInt = map(isInt, rhs)
 
         cuts = []
-        for rowInd in xrange(s.nConstraints):
+        for rowInd in range(s.nConstraints):
             basicVarInd = bv[rowInd]
             if basicVarInd < clpModel.nVariables and intInds[basicVarInd] and not rhsIsInt[rowInd]:
                 coef, b = gomoryCut(clpModel, rowInd)
                 if b is not None:
-                    #print 'Adding cut: ', coef, '>=', b
+                    #print('Adding cut: ', coef, '>=', b)
                     expr = CyLPArray(coef) * x >= b
                     cuts.append(expr)
         return cuts
@@ -80,8 +81,8 @@ if __name__ == '__main__':
         s = CyClpSimplex(m)
     else:
         s = CyClpSimplex()
-        #cylpDir = os.environ['CYLP_SOURCE_DIR']
-        inputFile = os.path.join('..', '..', 'input', 'p0033.mps')
+        cylpDir = os.environ['CYLP_SOURCE_DIR']
+        inputFile = os.path.join(cylpDir, 'cylp', 'input', 'p0033.mps')
         m = s.extractCyLPModel(inputFile)
         x = m.getVarByName('x')
         s.setInteger(x)
@@ -89,10 +90,9 @@ if __name__ == '__main__':
     cbcModel = s.getCbcModel()
 
     gc = GomoryCutGenerator(m)
-    #cbcModel.addPythonCutGenerator(gc, name='PyGomory')
+    cbcModel.addPythonCutGenerator(gc, name='PyGomory')
 
-    #cbcModel.branchAndBound()
-    cbcModel.solve()
-    
-    print cbcModel.primalVariableSolution
+    cbcModel.branchAndBound()
+
+    print(cbcModel.primalVariableSolution)
 
